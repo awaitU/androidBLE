@@ -1,12 +1,13 @@
 # 一，获取开发所需的权限  
-<uses-permission android:name="android.permission.BLUETOOTH" />
-<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
 # 二，发现设备  
         //获取蓝牙适配器
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
-       // 设置搜索设备时间，到时停止搜索设备
+        //设置搜索设备时间，到时停止搜索设备
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -18,19 +19,19 @@
             mScanning = true;
             mBluetoothAdapter.startLeScan(mLeScanCallback);
 
- //回调函数，添加设备address到列表显示  
-private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-        @Override
-        public void onLeScan(final BluetoothDevice device, final int rssi,
+        //回调函数，添加设备address到列表显示  
+        private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
+            @Override
+            public void onLeScan(final BluetoothDevice device, final int rssi,
                              byte[] scanRecord) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+					public void run() {
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addDevice(device, rssi);
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								addDevice(device, rssi);
                         }
                     });
                 }
@@ -59,11 +60,11 @@ private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.L
     }
 
 # 三，连接设备  
-为设备列表添加点击事件，点击连接设备：
-注意：连接设备的时候需要停止搜索！
-核心代码：
-回传蓝牙地址信息到原活动页面
- public void onItemClick(AdapterView<?> parent, View view, int position,
+	为设备列表添加点击事件，点击连接设备：  
+	注意：连接设备的时候需要停止搜索！  
+	核心代码：  
+	回传蓝牙地址信息到原活动页面  
+	public void onItemClick(AdapterView<?> parent, View view, int position,
                                 long id) {
             BluetoothDevice device = deviceList.get(position);
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
@@ -76,7 +77,7 @@ private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.L
             finish();
 
         }
-//接收信息，开始连接
+	//接收信息，开始连接
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 888888 && resultCode == RESULT_OK) {
             onDeviceSelect(data);
@@ -95,13 +96,13 @@ private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.L
         mService.connect(deviceAddress);
     }
 
-//此为connect函数核心代码,其中最为重要的就是mGattCallback函数，里面包含连接状态监控，服务发现以及接收数据
+	//此为connect函数核心代码,其中最为重要的就是mGattCallback函数，里面包含连接状态监控，服务发现以及接收数据
        final BluetoothDevice device = mBluetoothAdapter
                 .getRemoteDevice(address);
        mBluetoothGatt = device.connectGatt(this.mContext, false, mGattCallback);
 
-//下面是mGattCallback的代码
-private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+	//下面是mGattCallback的代码
+	private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         public void onConnectionStateChange(BluetoothGatt gatt, int status,
                                             int newState) {
 
@@ -190,21 +191,23 @@ private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
 
 
 # 四， 数据通信  
-两端要进行数据通信的话，肯定需要桥梁，这个桥梁就是BLE中独特的service与characteristic，根据约定的service与characteristic值（在上面连接中回调函数可以获取所有的服务与特征值，一般厂家会给出所需值，自己测试的话需要尝试获取指定值）进行数据通信。
+两端要进行数据通信的话，肯定需要桥梁，这个桥梁就是BLE中独特的service与characteristic，  
+根据约定的service与characteristic值（在上面连接中回调函数可以获取所有的服务与特征值，一  
+般厂家会给出所需值，自己测试的话需要尝试获取指定值）进行数据通信。  
 
-//发送数据的核心代码：
+	//发送数据的核心代码：  
         BluetoothGattService UartService_Dialog = mBluetoothGatt.getService(RX_SERVICE_UUID_DIALOG);
         BluetoothGattCharacteristic RxChar = UartService_Dialog.getCharacteristic(RX_CHAR_UUID_DIALOG);
         RxChar.setValue(value);
         boolean status = mBluetoothGatt.writeCharacteristic(RxChar);
 
 # 五， 总结  
-android BLE蓝牙开发的总流程为：获取权限→搜索设备→连接设备→数据通信
-参考：
-Android 蓝牙4.0（BLE）开发实现对蓝牙的写入数据和读取数据：
-https://blog.csdn.net/HAndroidevelopcker/article/details/78614508
-android蓝牙连接通信的实现：
-https://blog.csdn.net/taoyuxin1314/article/details/78928249
+android BLE蓝牙开发的总流程为：获取权限→搜索设备→连接设备→数据通信  
+参考：  
+Android 蓝牙4.0（BLE）开发实现对蓝牙的写入数据和读取数据：  
+https://blog.csdn.net/HAndroidevelopcker/article/details/78614508  
+android蓝牙连接通信的实现：  
+https://blog.csdn.net/taoyuxin1314/article/details/78928249  
 
 
 
